@@ -1,0 +1,360 @@
+/* ── Reset & base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --brand:    #e8714a;
+  --brand-dk: #c95a35;
+  --green:    #4caf50;
+  --blue:     #2196f3;
+  --bg:       #faf9f6;
+  --card-bg:  #ffffff;
+  --text:     #2d2d2d;
+  --muted:    #777;
+  --radius:   14px;
+  --shadow:   0 2px 16px rgba(0,0,0,.08);
+}
+
+body {
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app { max-width: 960px; margin: 0 auto; padding: 0 16px 48px; }
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--brand) 0%, #f7a47a 100%);
+  color: #fff;
+  border-radius: 0 0 24px 24px;
+  margin: 0 -16px 32px;
+  padding: 32px 32px 28px;
+}
+.header-inner { max-width: 928px; margin: 0 auto; }
+.logo { font-size: 1.8rem; font-weight: 700; letter-spacing: .5px; }
+.header-sub { margin-top: 4px; opacity: .9; font-size: .95rem; }
+.date-badge {
+  display: inline-block;
+  margin-top: 12px;
+  background: rgba(255,255,255,.25);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: .85rem;
+}
+
+/* ── Controls ── */
+.controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+.city-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 8px 14px;
+  box-shadow: var(--shadow);
+}
+.city-select-wrap label { font-weight: 600; white-space: nowrap; }
+select {
+  border: none;
+  outline: none;
+  font-size: .95rem;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.refresh-btn {
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: .95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+  font-family: inherit;
+}
+.refresh-btn:hover  { background: var(--brand-dk); }
+.refresh-btn:active { transform: scale(.97); }
+.refresh-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ── Loading ── */
+.loading {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--muted);
+}
+.spinner {
+  width: 44px; height: 44px;
+  border: 4px solid #eee;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-msg {
+  background: #fff3f3;
+  border: 1px solid #f9a8a8;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  color: #c0392b;
+  margin-bottom: 20px;
+}
+
+.hidden { display: none !important; }
+
+/* ── Sections ── */
+.section { margin-bottom: 36px; }
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.section-note {
+  font-size: .85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.section-note a { color: var(--brand); text-decoration: none; }
+
+/* ── Weather Card ── */
+.weather-card {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f1f8e9 100%);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+.weather-main { display: flex; align-items: center; gap: 12px; }
+.weather-icon { font-size: 3rem; line-height: 1; }
+.weather-temp { font-size: 2.2rem; font-weight: 700; color: #1565c0; }
+.weather-desc { font-size: 1rem; color: #555; }
+.weather-details { display: flex; flex-wrap: wrap; gap: 16px; }
+.weather-detail { font-size: .88rem; color: #444; }
+.weather-detail strong { display: block; font-size: 1rem; font-weight: 700; }
+.weather-mood {
+  margin-left: auto;
+  background: rgba(255,255,255,.7);
+  border-radius: 10px;
+  padding: 10px 16px;
+  text-align: center;
+}
+.weather-mood-label { font-size: .8rem; color: var(--muted); }
+.weather-mood-val { font-size: .95rem; font-weight: 700; color: var(--brand); margin-top: 2px; }
+.weather-styles { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.style-tag {
+  background: var(--brand);
+  color: #fff;
+  border-radius: 12px;
+  padding: 2px 10px;
+  font-size: .78rem;
+  font-weight: 600;
+}
+
+/* ── Vegetables Grid ── */
+.veg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.veg-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  text-align: center;
+  border-top: 3px solid var(--green);
+  transition: transform .15s;
+}
+.veg-card:hover { transform: translateY(-2px); }
+.veg-card.highlight { border-top-color: var(--brand); }
+.veg-name { font-size: 1rem; font-weight: 700; }
+.veg-price { font-size: 1.3rem; font-weight: 800; color: var(--brand); margin: 4px 0 2px; }
+.veg-unit { font-size: .75rem; color: var(--muted); }
+.veg-level { font-size: .8rem; margin-top: 4px; }
+.veg-cat { font-size: .75rem; color: #aaa; margin-top: 2px; }
+
+/* ── Menu Grid ── */
+.menu-grid { display: flex; flex-direction: column; gap: 20px; }
+.meal-block {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.meal-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 20px;
+  background: linear-gradient(90deg, #fff8f5 0%, #fff 100%);
+  border-bottom: 1px solid #f0ece8;
+}
+.meal-type-label { font-size: 1.05rem; font-weight: 700; }
+.meal-veg-badge {
+  margin-left: auto;
+  background: #f0faf0;
+  color: var(--green);
+  border-radius: 12px;
+  padding: 3px 12px;
+  font-size: .82rem;
+  font-weight: 600;
+  border: 1px solid #c8e6c9;
+}
+.meal-veg-price { font-size: .8rem; color: #888; margin-left: 6px; }
+.recipes-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0;
+}
+.recipe-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  border-right: 1px solid #f0ece8;
+  transition: background .15s;
+}
+.recipe-card:last-child { border-right: none; }
+.recipe-card:hover { background: #fffaf8; }
+.recipe-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  background: #f5ede8;
+}
+.recipe-img-placeholder {
+  width: 100%;
+  aspect-ratio: 16/9;
+  background: linear-gradient(135deg, #f5ede8, #fce4d6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+}
+.recipe-info { padding: 12px 14px; flex: 1; }
+.recipe-title {
+  font-size: .92rem;
+  font-weight: 600;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.recipe-tag {
+  display: inline-block;
+  margin-top: 6px;
+  background: #fff3ee;
+  color: var(--brand);
+  border-radius: 8px;
+  padding: 2px 8px;
+  font-size: .75rem;
+  font-weight: 600;
+}
+.recipe-link-hint {
+  font-size: .78rem;
+  color: #aaa;
+  margin-top: 6px;
+}
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  font-size: .8rem;
+  color: #aaa;
+  padding: 24px 0;
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+}
+.footer a { color: var(--brand); text-decoration: none; }
+
+/* ── Full meal badge ── */
+.full-meal-badge {
+  margin-left: 10px;
+  background: linear-gradient(90deg, #e8714a, #f7a47a);
+  color: #fff;
+  border-radius: 12px;
+  padding: 3px 12px;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .3px;
+}
+
+/* ── Components grid (肉湯菜蛋) ── */
+.components-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  border-top: 1px solid #f0ece8;
+}
+.comp-block {
+  padding: 14px 16px;
+  border-right: 1px solid #f0ece8;
+  border-bottom: 1px solid #f0ece8;
+}
+.comp-block:nth-child(2n) { border-right: none; }
+.comp-block:nth-last-child(-n+2) { border-bottom: none; }
+
+.comp-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+.comp-icon   { font-size: 1.1rem; }
+.comp-label  { font-size: .8rem; font-weight: 700; }
+.comp-ingredient { font-size: .9rem; font-weight: 700; color: #333; }
+.comp-price  { font-size: .75rem; color: #aaa; margin-left: auto; }
+
+.comp-suggestions { display: flex; flex-direction: column; gap: 6px; }
+
+/* ── Suggestion cards ── */
+.suggestions-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0;
+}
+.suggestion-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  padding: 16px 18px;
+  border-right: 1px solid #f0ece8;
+  transition: filter .15s, transform .1s;
+  gap: 4px;
+}
+.suggestion-card:last-child { border-right: none; }
+.suggestion-card:hover { filter: brightness(.97); transform: translateY(-1px); }
+.suggestion-label { font-size: .98rem; font-weight: 700; line-height: 1.3; }
+.suggestion-reason { font-size: .8rem; color: #888; margin-top: 2px; }
+.suggestion-cta {
+  margin-top: auto;
+  padding-top: 10px;
+  font-size: .8rem;
+  font-weight: 600;
+  color: #aaa;
+}
+.meal-icon-big { font-size: 1.3rem; }
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .header { padding: 24px 20px 20px; }
+  .logo { font-size: 1.4rem; }
+  .recipes-row { grid-template-columns: 1fr 1fr; }
+  .weather-mood { display: none; }
+}

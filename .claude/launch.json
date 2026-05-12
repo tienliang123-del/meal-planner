@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "meal-planner",
+      "runtimeExecutable": "C:\\Users\\e5012\\tsubiai\\meal-planner\\.venv\\Scripts\\uvicorn.exe",
+      "runtimeArgs": ["main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"],
+      "port": 8000
+    }
+  ]
+}

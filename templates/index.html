@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>每日菜單推薦 🍳</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-inner">
+        <div class="logo">🍳 每日菜單推薦</div>
+        <div class="header-sub">今天吃什麼，讓市場和天氣幫你決定</div>
+        <div class="date-badge">{{ today }}</div>
+      </div>
+    </header>
+
+    <!-- Controls -->
+    <div class="controls">
+      <div class="city-select-wrap">
+        <label for="city-select">📍 城市</label>
+        <select id="city-select">
+          {% for city in cities %}
+          <option value="{{ city }}" {% if city == "臺北市" %}selected{% endif %}>{{ city }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <button id="refresh-btn" class="refresh-btn" onclick="loadMenu()">
+        <span id="btn-icon">🔄</span> 換一組菜單
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>正在查詢天氣和市場菜價，為你搭配今日菜單…</p>
+    </div>
+
+    <!-- Error -->
+    <div id="error-msg" class="error-msg hidden"></div>
+
+    <!-- Main content -->
+    <div id="main-content" class="hidden">
+      <!-- Weather Card -->
+      <section class="section">
+        <h2 class="section-title">🌤️ 今日天氣</h2>
+        <div class="weather-card" id="weather-card"></div>
+      </section>
+
+      <!-- Market Prices -->
+      <section class="section">
+        <h2 class="section-title">🥬 今日便宜蔬菜</h2>
+        <p class="section-note">農委會批發市場即時價格 — 越便宜越推薦</p>
+        <div class="veg-grid" id="veg-grid"></div>
+      </section>
+
+      <!-- Menu -->
+      <section class="section">
+        <h2 class="section-title">🍽️ 今日菜單建議</h2>
+        <p class="section-note">根據天氣心情 × 便宜食材，從 <a href="https://icook.tw" target="_blank">icook.tw</a> 為你挑選</p>
+        <div class="menu-grid" id="menu-grid"></div>
+      </section>
+    </div>
+  </div>
+
+  <footer class="footer">
+    天氣資料來源：<a href="https://open-meteo.com" target="_blank">Open-Meteo</a> ｜
+    菜價資料來源：<a href="https://data.moa.gov.tw" target="_blank">農委會開放資料</a> ｜
+    食譜來源：<a href="https://icook.tw" target="_blank">愛料理 iCook</a>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
