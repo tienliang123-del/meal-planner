@@ -66,7 +66,7 @@ async def get_weather(city: str = "臺北市") -> dict:
         "&timezone=Asia%2FTaipei&forecast_days=1"
     )
     try:
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(timeout=20) as client:
             resp = await client.get(url)
             resp.raise_for_status()
             data = resp.json()

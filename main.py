@@ -2,14 +2,24 @@ from fastapi import FastAPI, Request, Query
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 import asyncio
 from datetime import datetime
+
+
+class TimeoutMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        try:
+            return await asyncio.wait_for(call_next(request), timeout=55)
+        except asyncio.TimeoutError:
+            return JSONResponse({"error": "請求逾時，請重試"}, status_code=504)
 
 from services.weather import get_weather, CITY_COORDS
 from services.market import get_cheap_vegetables
 from services.recommender import generate_menu
 
 app = FastAPI(title="每日菜單推薦", description="結合天氣、市場菜價、icook.tw 食譜的自動菜單平台")
+app.add_middleware(TimeoutMiddleware)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 

@@ -36,7 +36,7 @@ def _get_category(name: str) -> str:
 
 async def get_cheap_vegetables(top_n: int = 6) -> list:
     try:
-        async with httpx.AsyncClient(timeout=15) as client:
+        async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.get(
                 MARKET_API,
                 params={"$format": "json"},
