@@ -42,7 +42,7 @@ function renderVegetables(vegs) {
   `).join('');
 }
 
-/* ── Menu ── */
+/* ── Recipe cards ── */
 const COMP_COLORS = {
   '菜': { border: '#4caf50', bg: '#f0fff4', label: '#388e3c' },
   '肉': { border: '#e8714a', bg: '#fff8f5', label: '#c0392b' },
@@ -50,15 +50,11 @@ const COMP_COLORS = {
   '蛋': { border: '#ff9800', bg: '#fffdf0', label: '#e65100' },
 };
 
-function suggestionCard(s, idx) {
-  const colors = ['#e8714a', '#4caf50', '#2196f3'];
-  const bgs    = ['#fff8f5', '#f0fff4', '#f0f4ff'];
+function recipeCard(recipe) {
   return `
-    <a class="suggestion-card" href="${s.url}" target="_blank" rel="noopener"
-       style="border-left:4px solid ${colors[idx%3]}; background:${bgs[idx%3]}">
-      <div class="suggestion-label" style="color:${colors[idx%3]}">${s.label}</div>
-      <div class="suggestion-reason">${s.reason}</div>
-      <div class="suggestion-cta">在 iCook 搜尋 →</div>
+    <a class="recipe-link" href="${recipe.url}" target="_blank" rel="noopener">
+      <span class="recipe-link-title">${recipe.title}</span>
+      <span class="recipe-link-arrow">→</span>
     </a>
   `;
 }
@@ -68,21 +64,29 @@ function componentBlock(comp) {
   const priceTag = comp.badge_info && comp.badge_info.price
     ? `<span class="comp-price">${comp.badge_info.price} ${comp.badge_info.unit}</span>`
     : '';
+  const recipes = comp.recipes || [];
   return `
-    <div class="comp-block" style="border-top:3px solid ${c.border}">
+    <div class="comp-block" style="border-top: 3px solid ${c.border}">
       <div class="comp-header">
         <span class="comp-icon">${comp.icon}</span>
         <span class="comp-label" style="color:${c.label}">${comp.label}</span>
         <span class="comp-ingredient">${comp.ingredient}</span>
         ${priceTag}
       </div>
-      <div class="comp-suggestions">
-        ${comp.suggestions.map((s, i) => suggestionCard(s, i)).join('')}
+      <div class="comp-recipes">
+        ${recipes.length
+          ? recipes.map(r => recipeCard(r)).join('')
+          : `<a class="recipe-link fallback" href="https://icook.tw/search/recipe?q=${encodeURIComponent(comp.ingredient)}" target="_blank" rel="noopener">
+               <span class="recipe-link-title">搜尋「${comp.ingredient}」食譜</span>
+               <span class="recipe-link-arrow">→</span>
+             </a>`
+        }
       </div>
     </div>
   `;
 }
 
+/* ── Menu ── */
 function renderMenu(menu) {
   $('menu-grid').innerHTML = menu.map(meal => {
     const isFullMeal = meal.components.length > 1;

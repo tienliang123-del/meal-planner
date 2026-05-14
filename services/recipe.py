@@ -1,78 +1,106 @@
-from urllib.parse import quote
+import httpx
+import asyncio
+import random
 
-ICOOK_SEARCH = "https://icook.tw/search/recipe?q={}"
+ICOOK_API    = "https://icook.tw/api/v1/recipes/search"
+ICOOK_RECIPE = "https://icook.tw/recipes/{id}"
+ICOOK_COVER  = "https://imageproxy.icook.tw/scale?url={url}&width=360&height=270"
+
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) "
+        "AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148"
+    ),
+    "Accept": "application/json",
+    "Accept-Language": "zh-TW,zh;q=0.9",
+    "Referer": "https://icook.tw/",
+}
 
 MEAL_STYLE_MAP = {
     "早餐": ["快速", "簡單", "早餐"],
-    "午餐": ["家常", "便當", "快炒"],
-    "晚餐": ["湯", "燉", "家常菜"],
+    "午餐": ["家常", "便當", "下飯"],
+    "晚餐": ["家常", "燉", "湯", "滷"],
 }
 
 WEATHER_STYLE_MAP = {
-    "涼拌":  ["涼拌", "冷盤", "清蒸"],
-    "清炒":  ["清炒", "炒", "快炒"],
-    "燉":    ["燉", "滷", "燜"],
-    "煲湯":  ["湯", "煲湯", "燉湯"],
-    "火鍋":  ["火鍋", "麻辣"],
-    "炒":    ["炒", "快炒", "家常"],
-    "蒸":    ["清蒸", "蒸"],
-    "湯":    ["湯", "清湯", "羹"],
-}
-
-MEAL_ICONS = {
-    "早餐": "🌅",
-    "午餐": "☀️",
-    "晚餐": "🌙",
+    "炎熱": ["涼拌", "清炒", "清蒸"],
+    "寒冷": ["燉", "滷", "紅燒"],
+    "下雨": ["燉", "湯"],
+    "舒適": ["炒", "家常"],
 }
 
 
-def _build_queries(ingredient: str, meal_type: str, weather_styles: list) -> list[dict]:
-    """
-    為一個食材 × 三餐類型 × 天氣口味，產生 3 組搜尋建議。
-    每組包含：查詢字串、推薦理由、icook.tw 連結。
-    """
-    suggestions = []
-
-    # 搜尋組合 1：食材 + 天氣適合的烹調法
-    primary_style = weather_styles[0] if weather_styles else "家常"
-    q1 = f"{ingredient}{primary_style}"
-    suggestions.append({
-        "query": q1,
-        "label": f"{primary_style}{ingredient}",
-        "reason": f"天氣適合{primary_style}",
-        "url": ICOOK_SEARCH.format(quote(q1)),
-    })
-
-    # 搜尋組合 2：食材 + 三餐特色
-    meal_styles = MEAL_STYLE_MAP.get(meal_type, ["家常"])
-    q2 = f"{ingredient}{meal_styles[0]}"
-    suggestions.append({
-        "query": q2,
-        "label": f"{meal_styles[0]}{ingredient}",
-        "reason": f"適合當{meal_type}",
-        "url": ICOOK_SEARCH.format(quote(q2)),
-    })
-
-    # 搜尋組合 3：純食材（讓用戶自由選）
-    suggestions.append({
-        "query": ingredient,
-        "label": f"所有{ingredient}食譜",
-        "reason": "自由挑選",
-        "url": ICOOK_SEARCH.format(quote(ingredient)),
-    })
-
-    return suggestions
+def _build_query(ingredient: str, styles: list) -> str:
+    style = styles[0] if styles else ""
+    return f"{ingredient}{style}" if style else ingredient
 
 
-async def search_recipes(ingredient: str, preferred_styles: list = None, count: int = 2) -> list:
-    """
-    回傳 icook.tw 搜尋建議連結（不爬蟲，icook 為 JS 動態渲染）。
-    """
-    styles = preferred_styles or ["家常"]
-    meal_type = "午餐"  # 預設，由 recommender 傳入
-    return _build_queries(ingredient, meal_type, styles)[:count]
+def _parse_recipe(rec: dict) -> dict:
+    rid   = rec.get("id", "")
+    name  = rec.get("name", "")
+    cover = rec.get("cover", "")
+    # cover 有時是 list，有時是 str
+    if isinstance(cover, list):
+        cover = cover[0] if cover else ""
+    image = ICOOK_COVER.format(url=cover) if cover else ""
+    return {
+        "title": name,
+        "url":   ICOOK_RECIPE.format(id=rid),
+        "image": image,
+        "ingredient": ingredient if "ingredient" in rec else "",
+    }
+
+
+async def _search(query: str, ingredient: str, count: int = 2) -> list:
+    try:
+        async with httpx.AsyncClient(timeout=12, follow_redirects=True, headers=HEADERS) as c:
+            resp = await c.get(ICOOK_API, params={"q": query, "page": 1})
+            resp.raise_for_status()
+            data = resp.json()
+    except Exception:
+        return []
+
+    recipes = data.get("recipes", [])
+    parsed  = [_parse_recipe(r) for r in recipes if r.get("id") and r.get("name")]
+    for p in parsed:
+        p["ingredient"] = ingredient
+    random.shuffle(parsed)
+    return parsed[:count]
+
+
+def _clean_ingredient(name: str) -> str:
+    """市場名稱常帶品種（如「冬瓜-青皮」「菠菜-甜菠菜」），搜食譜時只取主名。"""
+    return name.split("-")[0].split("(")[0].strip()
+
+
+async def fetch_recipes_for_component(ingredient: str, meal_type: str, weather_styles: list, count: int = 2) -> list:
+    """用 icook.tw 官方 API 搜尋，回傳 count 筆真實食譜連結。"""
+    clean          = _clean_ingredient(ingredient)
+    meal_styles    = MEAL_STYLE_MAP.get(meal_type, ["家常"])
+    primary_style  = weather_styles[0] if weather_styles else meal_styles[0]
+
+    queries = [
+        f"{clean}{primary_style}",
+        f"{clean}{meal_styles[0]}",
+        clean,
+    ]
+
+    for query in queries:
+        results = await _search(query, ingredient, count)
+        if results:
+            return results
+        await asyncio.sleep(0.2)
+
+    # API 全失敗的備援連結
+    from urllib.parse import quote
+    return [{
+        "title":      f"搜尋「{ingredient}」食譜",
+        "url":        f"https://icook.tw/search/recipe?q={quote(ingredient)}",
+        "image":      "",
+        "ingredient": ingredient,
+    }]
 
 
 def build_meal_suggestions(ingredient: str, meal_type: str, weather_styles: list) -> list:
-    """供 recommender 直接呼叫，帶入三餐類型。"""
-    return _build_queries(ingredient, meal_type, weather_styles)
+    """保留相容性，供直接呼叫（回傳 query 列表）。"""
+    return [{"query": ingredient, "ingredient": ingredient, "meal_type": meal_type}]
